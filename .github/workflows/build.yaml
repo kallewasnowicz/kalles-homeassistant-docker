@@ -25,5 +25,5 @@ jobs:
 
     - name: Push Docker image
       run: |
-        docker push kallewasnowicz/kalles-homeassistant-docker .
+        docker push kallewasnowicz/kalles-homeassistant-docker
 
