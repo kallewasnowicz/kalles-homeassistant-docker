@@ -1,6 +1,8 @@
 name: Build and Push Docker Image
 
 on:
+  schedule:
+    - cron: '0 0 * * *'
   push:
     branches:
       - main
@@ -19,11 +21,24 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_TOKEN }}
 
-    - name: Build Docker image
-      run: |
-        docker build -t kallewasnowicz/kalles-homeassistant-docker .
+    #- name: Build Docker image
+    #  run: |
+    #    docker build -t kallewasnowicz/kalles-homeassistant-docker .
 
-    - name: Push Docker image
-      run: |
-        docker push kallewasnowicz/kalles-homeassistant-docker
+    #- name: Push Docker image
+    #  run: |
+    #    docker push kallewasnowicz/kalles-homeassistant-docker
 
+    - name: Check for upstream updates
+      run: |
+        # Pull the latest Home Assistant image
+        docker pull ghcr.io/home-assistant/home-assistant:stable
+
+        # Check if the local image is outdated
+        if [ "$(docker inspect -f '{{.Id}}' ghcr.io/home-assistant/home-assistant:stable)" != "$(docker inspect -f '{{.Id}}' kallewasnowicz/kalles-homeassistant-docker:latest)" ]; then
+          echo "Updating the Docker image..."
+          docker build -t kallewasnowicz/kalles-homeassistant-docker .
+          docker push kallewasnowicz/kalles-homeassistant-docker
+        else
+          echo "The image is up to date."
+        fi
